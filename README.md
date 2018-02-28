@@ -66,7 +66,8 @@ Alternativ kann der Status über folgenden Endpoint abgefragt werden
 
 ```json
 {
-    "state": "success|waiting"
+    "uuid":"<uuid>",
+    "state": "success|waiting|something went wrong"
 }
 ```
-> HTTP Status Code: 200|503
+> HTTP Status Code: 200|503|500
