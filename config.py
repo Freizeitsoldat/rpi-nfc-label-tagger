@@ -14,3 +14,6 @@ class Configuration(metaclass=MetaFlaskEnv):
     PRINT_HEIGHT = 89
     PRINT_FONT_SIZE = 40
     
+    # NFC
+    # TAGGING_SCRIPT = '/usr/bin/python /root/rpi-nfc-tagger/run.py'
+    TAGGING_SCRIPT = 'sleep 10 #'
