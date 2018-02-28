@@ -70,14 +70,12 @@ def getPrintFile(url, description):
     return printFile
 
 # Threading
-
 def nfcDaemon(q, script, id, url, description):
     returned_value = subprocess.call(""+script+" -i '"+ id+"' -u '"+ url+"' -t '"+ description+"'", shell=True)
     q.put(returned_value)
     return returned_value
 
 q = Queue()
-
 # Flask api classes
 
 class Print(Resource):
@@ -120,14 +118,16 @@ class Print(Resource):
         except:
             return {"state": "something went wrong"}, 500
 
+
 class Tag(Resource):
 
     def post(self):
         try:
+
             for i in threading.enumerate():
                 if i.name == "nfcDaemon":
                     if i.isAlive():
-                        return {"state": "waiting"}, 503
+                        return {"state": "busy"}, 503
 
             data = request.get_json(force=True)
             if not 'url' in data:
@@ -162,17 +162,17 @@ class Tag(Resource):
                     for i in threading.enumerate():
                         if i.name == "nfcDaemon":
                             if i.isAlive():
-                                return {"state": "waiting"}, 503
+                                return {"state": "waiting", "uuid": id}, 503
                     
                     if not "state" in item:
                         item['state'] = q.get()
                     
                     if "state" in item:
-                        if item['state'] == 0:
-                            return {"state": "success"}, 200
+                        if item['state'] == 0: 
+                            return {"state": "success", "uuid": id}, 200
                         else:
-                            return {"state": "something went wrong"}, 500
-        
+                            return {"state": "something went wrong", "uuid": id}, 500
+
                 except:
                     return {"state": "something went wrong"}, 500          
         return {"state": "not found"}, 404
