@@ -54,7 +54,7 @@ python run.py
 ```json
 {
     "uuid":"<uuid>",
-    "state": "success|waiting|something went wrong"
+    "state": "success|busy|something went wrong"
 }
 ```
 > HTTP Status Code: 200|503|500
