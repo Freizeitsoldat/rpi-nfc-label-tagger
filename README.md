@@ -62,7 +62,7 @@ python run.py
 
 Alternativ kann der Status über folgenden Endpoint abgefragt werden
 
-### GET /api/nfc/<uuid>
+### GET /api/nfc/'uuid'
 
 ```json
 {
