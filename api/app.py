@@ -122,7 +122,7 @@ class Print(Resource):
 class Tag(Resource):
 
     def post(self):
-        #try:
+        try:
 
             #for i in threading.enumerate():
             #    if i.name == "nfcDaemon":
@@ -156,8 +156,8 @@ class Tag(Resource):
             d.start()
 
             return {"state": "success", 'uuid': id}, 200
-        #except:
-        #    return {"state": "something went wrong"}, 500
+        except:
+            return {"state": "something went wrong"}, 500
 
     def get(self, id):
 
