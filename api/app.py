@@ -2,18 +2,17 @@ import qrcode, os, uuid
 import PIL
 import textwrap
 import cups
+import threading
+import time
+import logging
+import os
+import subprocess
 
 from flask import Flask, Blueprint, request, jsonify
 from flask_restful import Resource, Api
 from PIL import Image as pimg
 from flask import current_app
 from PIL import ImageFont, Image, ImageDraw
-
-import threading
-import time
-import logging
-import os
-import subprocess
 from multiprocessing import Queue
 
 api = Blueprint('api', 'app', url_prefix='/api')
@@ -72,12 +71,12 @@ def getPrintFile(url, description):
 
 # Threading
 
-def nfcDaemon(q, id, url, description):
-    returned_value = subprocess.call("/usr/bin/python /root/rpi-nfc-tagger/run.py -i '"+ id+"' -u '"+ url+"' -t '"+ description+"'", shell=True)
+def nfcDaemon(q, script, id, url, description):
+    returned_value = subprocess.call(""+script+" -i '"+ id+"' -u '"+ url+"' -t '"+ description+"'", shell=True)
     q.put(returned_value)
     return returned_value
 
-q = Queue(maxsize=0)
+q = Queue()
 
 # Flask api classes
 
@@ -144,11 +143,10 @@ class Tag(Resource):
             else: 
                 description = None
 
-            tagHistory = []
             tagHistory.append({'uuid': id,'url': url })
 
             # Start tagging
-            d = threading.Thread(name='nfcDaemon', target=nfcDaemon, args=(q, id, url, description))
+            d = threading.Thread(name='nfcDaemon', target=nfcDaemon, args=(q, current_app.config['TAGGING_SCRIPT'], id, url, description))
             d.setDaemon(True)
             d.start()
 
@@ -160,14 +158,23 @@ class Tag(Resource):
 
         for item in tagHistory:
             if item['uuid'] == id:
-                for i in threading.enumerate():
-                    if i.name == "nfcDaemon":
-                        if i.isAlive():
-                            return {"state": "waiting"}, 503
-                        else:
-                            i.join()
+                try:
+                    for i in threading.enumerate():
+                        if i.name == "nfcDaemon":
+                            if i.isAlive():
+                                return {"state": "waiting"}, 503
+                    
+                    if not "state" in item:
+                        item['state'] = q.get()
+                    
+                    if "state" in item:
+                        if item['state'] == 0:
                             return {"state": "success"}, 200
-            return {"state": "success"}, 200
+                        else:
+                            return {"state": "something went wrong"}, 500
+        
+                except:
+                    return {"state": "something went wrong"}, 500          
         return {"state": "not found"}, 404
 
 apiFramework.add_resource(Print, '/label', '/label/<string:id>')
