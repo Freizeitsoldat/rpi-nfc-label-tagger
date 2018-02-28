@@ -1,0 +1,14 @@
+Flask==0.12
+Flask-Env==1.0.1
+Flask-RESTful==0.3.6
+Jinja2==2.10
+MarkupSafe==1.0
+Pillow==5.0.0
+Werkzeug==0.14.1
+aniso8601==2.0.1
+click==6.7
+itsdangerous==0.24
+pycups==1.9.73
+pytz==2018.3
+qrcode==5.3
+six==1.11.0
